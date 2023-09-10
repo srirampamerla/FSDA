@@ -130,8 +130,87 @@ select * from loop_table
 
 Task 
 	1 . Create a loop for a table to insert a record into a tale for two columns in first coumn you have to inset a data ranging from 1 to 100 and in second column you hvae to inset a square of the first column 
-	2 . create a user defined function to find out a date differences in number of days 
-    3 . create a UDF to find out a log base 10 of any given number 
-    4 . create a UDF which will be able to check a total number of records avaible in your table 
-    5 . create a procedure to find out  5th highest profit in your sales table you dont have to use rank and windowing function 
+DELIMITER //
+
+CREATE PROCEDURE CalculateSquare(IN input INT, OUT square INT)
+BEGIN
+    SET square = input * input;
+END //
+
+CREATE PROCEDURE insert_data_with_for_loop()
+BEGIN
+    DECLARE counter INT DEFAULT 1;
     
+    WHILE counter <= 100 DO
+        DECLARE square_result INT;  -- Declare a variable to store the square
+        CALL CalculateSquare(counter, square_result);  -- Call CalculateSquare with two parameters
+        INSERT INTO my_table (column1, column2) VALUES (counter, square_result);
+        SET counter = counter + 1;
+    END WHILE;
+    
+END //
+
+DELIMITER ;
+
+	
+2 . create a user defined function to find out a date differences in number of days 
+DELIMITER //
+CREATE FUNCTION DateDiffInDays(date1 DATE, date2 DATE)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE dateDiff INT;
+    SET dateDiff = DATEDIFF(date2, date1);
+    RETURN dateDiff;
+END //
+
+DELIMITER ;
+SELECT DateDiffInDays('2023-09-01', '2023-09-10') AS days_diff;
+
+
+    3 . create a UDF to find out a log base 10 of any given number 
+DELIMITER //
+
+CREATE FUNCTION LogBase10(number DECIMAL(10, 2))
+RETURNS DECIMAL(10, 2)
+DETERMINISTIC
+BEGIN
+    DECLARE result DECIMAL(10, 2);
+    SET result = LOG10(number);
+    RETURN result;
+END //
+
+DELIMITER ;
+SELECT LogBase10(100) AS log_result;
+
+
+    4 . create a UDF which will be able to check a total number of records avaible in your table 
+DELIMITER //
+
+CREATE FUNCTION CountRecordsInTable(table_name VARCHAR(255))
+RETURNS INT
+BEGIN
+    DECLARE record_count INT;
+    SET record_count = 0;
+    
+    SELECT COUNT(*) INTO record_count FROM table_name;
+    
+    RETURN record_count;
+END //
+
+DELIMITER ;
+SELECT CountRecordsInTable('your_table_name') AS total_records;
+   
+5 . create a procedure to find out  5th highest profit in your sales table you dont have to use rank and windowing function 
+    DELIMITER //
+
+CREATE PROCEDURE FindFifthHighestProfit()
+BEGIN
+    SELECT DISTINCT profit AS fifth_highest_profit
+    FROM sales
+    ORDER BY profit DESC
+    LIMIT 1 OFFSET 4;
+END //
+
+DELIMITER ;
+CALL FindFifthHighestProfit();
